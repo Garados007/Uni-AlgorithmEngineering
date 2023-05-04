@@ -1,0 +1,3 @@
+[submodule "vendor/test/CVRPController"]
+	path = vendor/test/CVRPController
+	url = https://github.com/laser-ufpb/CVRPController.git
