@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{B01482DD-95F0-4902-AFEC-6EDE8A8C59C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CVRP", "CVRP\CVRP.csproj", "{BDE1378F-5F67-44EB-BD57-07C2F5980EF8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B01482DD-95F0-4902-AFEC-6EDE8A8C59C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B01482DD-95F0-4902-AFEC-6EDE8A8C59C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B01482DD-95F0-4902-AFEC-6EDE8A8C59C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B01482DD-95F0-4902-AFEC-6EDE8A8C59C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDE1378F-5F67-44EB-BD57-07C2F5980EF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDE1378F-5F67-44EB-BD57-07C2F5980EF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDE1378F-5F67-44EB-BD57-07C2F5980EF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDE1378F-5F67-44EB-BD57-07C2F5980EF8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
