@@ -198,4 +198,47 @@ public class Specification
             return null;
         return list;
     }
+
+    public void WriteTo(TextWriter writer)
+    {
+        writer.Write("NAME : ");
+        writer.WriteLine(Name);
+        foreach (var entry in Comment.Span)
+        {
+            writer.Write("COMMENT : ");
+            writer.WriteLine(entry);
+        }
+        writer.Write("TYPE : ");
+        writer.WriteLine(Type);
+        if (Dimension is not null)
+        {
+            writer.Write("DIMENSION : ");
+            writer.WriteLine(Dimension);
+        }
+        if (Capacity is not null)
+        {
+            writer.Write("CAPACITY : ");
+            writer.WriteLine(Capacity);
+        }
+        if (EdgeWeightType is not null)
+        {
+            writer.Write("EDGE_WEIGHT_TYPE : ");
+            writer.WriteLine(EdgeWeightType);
+        }
+        if (EdgeWeightFormat is not null)
+        {
+            writer.Write("EDGE_WEIGHT_FORMAT : ");
+            writer.WriteLine(EdgeWeightFormat);
+        }
+        if (EdgeDataFormat is not null)
+        {
+            writer.Write("EDGE_DATA_FORMAT : ");
+            writer.WriteLine(EdgeDataFormat);
+        }
+        writer.Write("NODE_COORD_TYPE : ");
+        writer.WriteLine(NodeCoordType);
+        writer.Write("DISPLAY_DATA_TYPE : ");
+        writer.WriteLine(DisplayDataType);
+        writer.WriteLine("EOF : ");
+    }
 }
