@@ -5,7 +5,8 @@ public sealed record DataFile(
     EdgeWeight? EdgeWeight = null,
     NodeCoord2D? NodeCoord2D = null,
     NodeCoord3D? NodeCoord3D = null,
-    Demand? Demand = null
+    Demand? Demand = null,
+    Depot? Depot = null
 )
 {
     public void WriteTo(TextWriter writer)
@@ -15,7 +16,7 @@ public sealed record DataFile(
         NodeCoord2D?.WriteTo(writer);
         NodeCoord3D?.WriteTo(writer);
         Demand?.WriteTo(writer);
-
+        Depot?.WriteTo(writer);
         writer.WriteLine("EOF");
     }
 }

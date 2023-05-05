@@ -56,6 +56,11 @@ public sealed class DataFileParser : ParserBase<DataFile>
                     var demand = new DemandParser(file.Specification.Dimension.Value).Parse(ref state);
                     file = file with { Demand = demand };
                     break;
+                case "DEPOT_SECTION":
+                    SkipUntilEndOfLine(ref state);
+                    var depot = new DepotParser().Parse(ref state);
+                    file = file with { Depot = depot };
+                    break;
                 case "EOF":
                     return file;
                 default:
