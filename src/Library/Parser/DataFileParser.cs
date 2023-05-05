@@ -64,8 +64,7 @@ public sealed class DataFileParser : ParserBase<DataFile>
                 case "EOF":
                     return file;
                 default:
-                    return file;
-                    // throw new ParseException(ref stateCopy, $"unknown data tag \"{line}\" found");
+                    throw new ParseException(ref stateCopy, $"unknown data tag \"{line}\" found");
             }
             stateCopy = state;
         }
