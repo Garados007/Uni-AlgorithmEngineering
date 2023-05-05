@@ -25,6 +25,9 @@ public ref struct State
 
     public long LastLineStart { get; private set; }
 
+    public string PositionString
+        => $"{TotalLine + 1}:{TotalRead - LastLineStart + 1} (offset {TotalRead})";
+
     public void Shift(int length)
     {
         ShiftNewLine(length);

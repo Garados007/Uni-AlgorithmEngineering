@@ -23,6 +23,32 @@ public sealed class DataFileParser : ParserBase<DataFile>
                     var edgeWeight = new EdgeWeightParser(file.Specification).Parse(ref state);
                     file = file with { EdgeWeight = edgeWeight };
                     break;
+                case "NODE_COORD_SECTION":
+                    SkipUntilEndOfLine(ref state);
+                    switch (file.Specification.NodeCoordType)
+                    {
+                        case NodeCoordType.NO_COORDS:
+                            throw new ParseException(ref state, "NODE_COORD_SECTION wasn't expected according specification");
+                        case NodeCoordType.TWOD_COORDS:
+                            if (file.NodeCoord2D is not null)
+                                throw new ParseException(ref state, "NODE_COORD_SECTION was already defined");
+                            if (file.Specification.Dimension is null)
+                                throw new ParseException(ref state, "Cannot read NODE_COORD_SECTION if dimension wasn't specified");
+                            var nodeCoord2D = new NodeCoord2DParser(file.Specification.Dimension.Value).Parse(ref state);
+                            file = file with { NodeCoord2D = nodeCoord2D };
+                            break;
+                        case NodeCoordType.THREED_COORDS:
+                            if (file.NodeCoord3D is not null)
+                                throw new ParseException(ref state, "NODE_COORD_SECTION was already defined");
+                            if (file.Specification.Dimension is null)
+                                throw new ParseException(ref state, "Cannot read NODE_COORD_SECTION if dimension wasn't specified");
+                            var nodeCoord3D = new NodeCoord3DParser(file.Specification.Dimension.Value).Parse(ref state);
+                            file = file with { NodeCoord3D = nodeCoord3D };
+                            break;
+                        default:
+                            throw new ParseException($"NODE_COORD_SECTION not supported for {file.Specification.NodeCoordType}");
+                    }
+                    break;
                 case "EOF":
                     return file;
                 default:
