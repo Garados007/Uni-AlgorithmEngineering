@@ -49,6 +49,13 @@ public sealed class DataFileParser : ParserBase<DataFile>
                             throw new ParseException($"NODE_COORD_SECTION not supported for {file.Specification.NodeCoordType}");
                     }
                     break;
+                case "DEMAND_SECTION":
+                    SkipUntilEndOfLine(ref state);
+                    if (file.Specification.Dimension is null)
+                        throw new ParseException(ref state, "Cannot read DEMAND_SECTION if dimension wasn't specified");
+                    var demand = new DemandParser(file.Specification.Dimension.Value).Parse(ref state);
+                    file = file with { Demand = demand };
+                    break;
                 case "EOF":
                     return file;
                 default:
