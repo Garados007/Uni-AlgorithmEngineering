@@ -91,6 +91,8 @@ public class Specification
             Library.EdgeWeightType.MAX_2D => NodeCoordType.TWOD_COORDS,
             Library.EdgeWeightType.MAN_2D => NodeCoordType.TWOD_COORDS,
             Library.EdgeWeightType.CEIL_2D => NodeCoordType.TWOD_COORDS,
+            Library.EdgeWeightType.GEO => NodeCoordType.TWOD_COORDS,
+            Library.EdgeWeightType.ATT => NodeCoordType.TWOD_COORDS,
             Library.EdgeWeightType.EUC_3D => NodeCoordType.THREED_COORDS,
             Library.EdgeWeightType.MAX_3D => NodeCoordType.THREED_COORDS,
             Library.EdgeWeightType.MAN_3D => NodeCoordType.THREED_COORDS,
