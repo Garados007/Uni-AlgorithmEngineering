@@ -87,6 +87,8 @@ jobs:
         with:
           name: build-binary
           path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
@@ -115,6 +117,8 @@ jobs:
         with:
           name: build-binary
           path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
