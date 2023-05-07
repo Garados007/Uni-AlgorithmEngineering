@@ -7,6 +7,7 @@ public sealed class DepotParser : ParserBase<Depot>
         var data = new Depot();
         while (!state.EOF)
         {
+            SkipWhitespace(ref state); // some test data is a mess
             var index = ReadInt32(ref state);
             if (index is null)
                 throw new ParseException(ref state, "integer value expected");

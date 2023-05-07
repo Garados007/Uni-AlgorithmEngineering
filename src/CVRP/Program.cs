@@ -15,9 +15,9 @@ public static class Program
     }
 
     public static int Main(string[] args)
-    => Main(args.AsSpan());
+    => Run(args.AsSpan());
 
-    public static int Main(ReadOnlySpan<string> args)
+    private static int Run(ReadOnlySpan<string> args)
     {
         if (args.Length == 0)
         {
