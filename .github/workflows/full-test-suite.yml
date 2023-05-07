@@ -86,6 +86,7 @@ jobs:
         continue-on-error: false
         with:
           name: build-binary
+          path: bin
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
@@ -113,6 +114,7 @@ jobs:
         continue-on-error: false
         with:
           name: build-binary
+          path: bin
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
