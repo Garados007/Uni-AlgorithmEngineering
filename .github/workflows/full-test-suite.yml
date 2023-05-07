@@ -1,0 +1,46 @@
+name: Full Test Suite
+run-name: All Tests
+on:
+  push:
+jobs:
+
+  GetGraphFiles:
+    name: Detect all Graph files
+    outputs:
+      files: ${{ steps.get_files.outputs.files }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Get Graph files
+        id: get_files
+        run: |
+          echo -n "files=" >> $GITHUB_OUTPUT && \
+          find vendor/test/CVRPController/ -name "*.vrp" | \
+            while read file; do echo "\"$file\""; done | \
+            jq -sc "." \
+            >> $GITHUB_OUTPUT
+
+  TestParsing:
+    name: |
+      Test graph file parsing: ${{ matrix.file }}
+    needs: GetGraphFiles
+    strategy:
+      matrix:
+        file: ${{ fromJSON(needs.GetGraphFiles.outputs.files) }}
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:7.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build CVRP binary
+        run: dotnet build -c Release -o bin --nologo src/CVRP/CVRP.csproj
+      - name: Run test
+        run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
+
+
+
