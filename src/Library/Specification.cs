@@ -75,11 +75,27 @@ public class Specification
         EdgeWeightType = GetEnum<EdgeWeightType>(data, "EDGE_WEIGHT_TYPE");
         EdgeWeightFormat = GetEnum<EdgeWeightFormat>(data, "EDGE_WEIGHT_FORMAT");
         EdgeDataFormat = GetEnum<EdgeDataFormat>(data, "EDGE_DATA_FORMAT");
-        NodeCoordType = GetEnum<NodeCoordType>(data, "NODE_COORD_TYPE") ?? NodeCoordType.NO_COORDS;
+        NodeCoordType = GetEnum<NodeCoordType>(data, "NODE_COORD_TYPE") ?? EnforcedNodeCoordType(EdgeWeightType);
         var display = GetEnum<DisplayDataType>(data, "DISPLAY_DATA_TYPE");
         if (display is null)
             DisplayDataType = NodeCoordType == NodeCoordType.NO_COORDS ? DisplayDataType.NO_DISPLAY : DisplayDataType.COORD_DISPLAY;
         else DisplayDataType = display.Value;
+    }
+
+    private static NodeCoordType EnforcedNodeCoordType(EdgeWeightType? type)
+    {
+        // some test data is a mess and needs to be fixed
+        return type switch
+        {
+            Library.EdgeWeightType.EUC_2D => NodeCoordType.TWOD_COORDS,
+            Library.EdgeWeightType.MAX_2D => NodeCoordType.TWOD_COORDS,
+            Library.EdgeWeightType.MAN_2D => NodeCoordType.TWOD_COORDS,
+            Library.EdgeWeightType.CEIL_2D => NodeCoordType.TWOD_COORDS,
+            Library.EdgeWeightType.EUC_3D => NodeCoordType.THREED_COORDS,
+            Library.EdgeWeightType.MAX_3D => NodeCoordType.THREED_COORDS,
+            Library.EdgeWeightType.MAN_3D => NodeCoordType.THREED_COORDS,
+            _ => NodeCoordType.NO_COORDS,
+        };
     }
 
     /// <summary>
