@@ -130,7 +130,7 @@ public abstract class ParserBase<T>
     /// </summary>
     /// <param name="state">the common reader state</param>
     /// <returns>the found string or null if the state is at a whitespace or the file has been finished</returns>
-    protected string? ReadString(ref State state)
+    protected string? ReadKeyword(ref State state)
     {
         var sb = new System.Text.StringBuilder();
         if (state.read == 0 && !ReadMoreData(ref state))
@@ -144,7 +144,7 @@ public abstract class ParserBase<T>
                 break;
             for (int offset = 0; offset < data.Length; ++offset)
             {
-                if (char.IsWhiteSpace(data[offset]))
+                if (!char.IsLetterOrDigit(data[offset]) && data[offset] != '_')
                 {
                     sb.Append(data[..offset]);
                     state.Shift(offset);

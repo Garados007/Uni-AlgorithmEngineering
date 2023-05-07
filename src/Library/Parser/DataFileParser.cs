@@ -12,7 +12,7 @@ public sealed class DataFileParser : ParserBase<DataFile>
 
         var stateCopy = state;
         string? line;
-        while ((line = ReadString(ref state)) != null)
+        while ((line = ReadKeyword(ref state)) != null)
         {
             switch (line)
             {

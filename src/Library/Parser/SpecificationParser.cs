@@ -24,14 +24,12 @@ public sealed class SpecificationParser : ParserBase<Specification>
         {
             if (!HasCloseColon(ref state))
                 break;
-            var key = ReadString(ref state)
+            var key = ReadKeyword(ref state)
                 ?? throw new ParseException(ref state, "Expected a keyword");
-            if (!SkipWhitespace(ref state))
-                throw new ParseException(ref state, "Expected whitespace");
+            SkipWhitespace(ref state);
             if (!CheckKeyword(ref state, ":"))
-                throw new ParseException(ref state, "Expected a colon");
-            if (!SkipWhitespace(ref state))
-                throw new ParseException(ref state, "Expected whitespace");
+                throw new ParseException(ref state, "Expected a colon or whitespace");
+            SkipWhitespace(ref state);
             if (key == "EOF")
             {
                 ReadLine(ref state);
