@@ -122,5 +122,22 @@ jobs:
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
-
-
+  DotnetTest:
+    name: Execute Dotnet test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Execute dotnet test
+        run: dotnet test -e "TEST_DATA=$(pwd)/../data"
+        working-directory: src
+      - name: Upload test artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: |
+            src/Test/TestResults
