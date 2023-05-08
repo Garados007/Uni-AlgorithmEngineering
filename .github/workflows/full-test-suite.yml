@@ -2,10 +2,32 @@ name: Full Test Suite
 run-name: All Tests
 on:
   push:
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+
 jobs:
 
-  GetGraphFiles:
-    name: Detect all Graph files
+  Build:
+    name: Build binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Build CVRP binary
+        run: dotnet build -c Release -o bin --nologo src/CVRP/CVRP.csproj
+      - name: Upload binary artefact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-binary
+          path: bin
+
+  GetCVRPControllerGraphs:
+    name: Detect CVRPController Graph files
     outputs:
       files: ${{ steps.get_files.outputs.files }}
     runs-on: ubuntu-latest
@@ -23,13 +45,32 @@ jobs:
             jq -sc "." \
             >> $GITHUB_OUTPUT
 
-  TestParsing:
+  GetTSPLIB95Graphs:
+    name: Detect TSPLIB95 Graph files
+    outputs:
+      files: ${{ steps.get_files.outputs.files }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Get Graph files
+        id: get_files
+        run: |
+          echo -n "files=" >> $GITHUB_OUTPUT && \
+          find data/TSPLIB95/vrp/ -name "*.vrp" | \
+            while read file; do echo "\"$file\""; done | \
+            jq -sc "." \
+            >> $GITHUB_OUTPUT
+
+  TestParsing_CVRPController:
     name: |
       Test graph file parsing: ${{ matrix.file }}
-    needs: GetGraphFiles
+    needs:
+      - Build
+      - GetCVRPControllerGraphs
     strategy:
       matrix:
-        file: ${{ fromJSON(needs.GetGraphFiles.outputs.files) }}
+        file: ${{ fromJSON(needs.GetCVRPControllerGraphs.outputs.files) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,15 +79,65 @@ jobs:
           submodules: recursive
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
-        env:
-          DOTNET_CLI_TELEMETRY_OPTOUT: true
-          DOTNET_NOLOGO: true
         with:
           dotnet-version: 7.0.x
-      - name: Build CVRP binary
-        run: dotnet build -c Release -o bin --nologo src/CVRP/CVRP.csproj
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
+  TestParsing_TSPLIB95:
+    name: |
+      Test graph file parsing: ${{ matrix.file }}
+    needs:
+      - Build
+      - GetTSPLIB95Graphs
+    strategy:
+      matrix:
+        file: ${{ fromJSON(needs.GetTSPLIB95Graphs.outputs.files) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
+      - name: Run test
+        run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
-
+  DotnetTest:
+    name: Execute Dotnet test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Execute dotnet test
+        run: dotnet test -e "TEST_DATA=$(pwd)/../data"
+        working-directory: src
+      - name: Upload test artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: |
+            src/Test/TestResults

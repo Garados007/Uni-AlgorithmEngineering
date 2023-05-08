@@ -19,6 +19,10 @@ public sealed class EdgeWeightParser : ParserBase<EdgeWeight>
                 if (Specification.Dimension is null)
                     throw new ParseException("dimension expected for EDGE_WEIGHT_SECTION");
                 return new EdgeWeightLowerRowParser(Specification.Dimension.Value).Parse(ref state);
+            case EdgeWeightFormat.LOWER_COL:
+                if (Specification.Dimension is null)
+                    throw new ParseException("dimension expected for EDGE_WEIGHT_SECTION");
+                return new EdgeWeightLowerColParser(Specification.Dimension.Value).Parse(ref state);
             default:
                 throw new ParseException($"edge weight format {Specification.EdgeWeightFormat} not supported");
         }

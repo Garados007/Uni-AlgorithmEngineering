@@ -1,3 +1,5 @@
 # all binary build files
 /src/**/bin
 /src/**/obj
+# all test files
+/src/Test/TestResults
