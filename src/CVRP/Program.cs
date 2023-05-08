@@ -29,6 +29,8 @@ public static class Program
         {
             case "parse-graph-and-output":
                 return new Command.ParseGraphAndOutput().Run(args[1..]);
+            case "parse-sol-and-output":
+                return new Command.ParseSolAndOutput().Run(args[1..]);
             default:
                 Console.Error.WriteLine($"Unknown command {args[0]}");
                 WriteHelp();

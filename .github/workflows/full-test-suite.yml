@@ -122,6 +122,36 @@ jobs:
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
+  TestParsing_CustomSol:
+    name: |
+      Test sol file parsing: ${{ matrix.file }}
+    needs:
+      - Build
+    strategy:
+      matrix:
+        file:
+          - data/Custom/toy.sol
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
+      - name: Run test
+        run: bin/CVRP parse-sol-and-output "${{ matrix.file }}"
+
   DotnetTest:
     name: Execute Dotnet test
     runs-on: ubuntu-latest
