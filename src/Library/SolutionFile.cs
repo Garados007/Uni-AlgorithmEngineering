@@ -16,7 +16,7 @@ public sealed class SolutionFile
             foreach (var node in Routes[i])
             {
                 writer.Write(' ');
-                writer.Write(node + 1);
+                writer.Write(node);
             }
             writer.WriteLine();
         }

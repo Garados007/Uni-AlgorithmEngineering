@@ -25,7 +25,7 @@ public sealed class SolutionFileParser : ParserBase<SolutionFile>
                         throw new ParseException(ref state, "consumer index expected");
                     break;
                 }
-                route.Add(index.Value - 1);
+                route.Add(index.Value);
             }
             file.Routes.Add(route);
         }
