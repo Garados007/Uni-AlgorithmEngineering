@@ -150,7 +150,7 @@ jobs:
             jq -sc "." \
             >> $GITHUB_OUTPUT
 
-  TestParsing_CustomSol:
+  TestParsing_SolutionFile:
     name: |
       Test sol file parsing: ${{ matrix.file }}
     needs:
@@ -184,8 +184,13 @@ jobs:
     name: |
       Test Validate Solution: ${{ matrix.file }}
     needs:
+      # data dependency
       - Build
       - GetSolutionFiles
+      # logical dependency
+      - TestParsing_CVRPController
+      - TestParsing_TSPLIB95
+      - TestParsing_SolutionFile
     strategy:
       matrix:
         file: ${{ fromJSON(needs.GetSolutionFiles.outputs.arnold_files) }}
