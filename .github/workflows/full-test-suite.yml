@@ -122,15 +122,34 @@ jobs:
       - name: Run test
         run: bin/CVRP parse-graph-and-output "${{ matrix.file }}"
 
+  GetSolutionFiles:
+    name: Detect Solution files
+    outputs:
+      files: ${{ steps.get_files.outputs.files }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Get Solution files
+        id: get_files
+        run: |
+          echo -n "files=" >> $GITHUB_OUTPUT && \
+          find data -name "*.sol" | \
+            while read file; do echo "\"$file\""; done | \
+            jq -sc "." \
+            >> $GITHUB_OUTPUT
+
   TestParsing_CustomSol:
     name: |
       Test sol file parsing: ${{ matrix.file }}
     needs:
       - Build
+      - GetSolutionFiles
     strategy:
       matrix:
-        file:
-          - data/Custom/toy.sol
+        file: ${{ fromJSON(needs.GetSolutionFiles.outputs.files) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
