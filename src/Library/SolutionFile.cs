@@ -23,4 +23,5 @@ public sealed class SolutionFile
         writer.Write("Cost ");
         writer.WriteLine(Cost);
     }
+
 }
