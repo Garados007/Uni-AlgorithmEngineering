@@ -11,6 +11,10 @@ public static class Program
 
             parse-graph-and-output:
                 Parse a graph file and output it's representation to the std output.
+            parse-sol-and-output:
+                Parse a solution file and output it's representation to the std output.
+            validate-sol:
+                Validates a solution file.
         """);
     }
 
@@ -29,6 +33,10 @@ public static class Program
         {
             case "parse-graph-and-output":
                 return new Command.ParseGraphAndOutput().Run(args[1..]);
+            case "parse-sol-and-output":
+                return new Command.ParseSolAndOutput().Run(args[1..]);
+            case "validate-sol":
+                return new Command.ValidateSol().Run(args[1..]);
             default:
                 Console.Error.WriteLine($"Unknown command {args[0]}");
                 WriteHelp();

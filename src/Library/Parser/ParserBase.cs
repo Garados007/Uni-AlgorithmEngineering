@@ -3,6 +3,32 @@ namespace Library.Parser;
 public abstract class ParserBase<T>
     where T : notnull
 {
+    public T Parse(string fileName)
+    {
+        if (fileName == "-")
+            return Parse(Console.In);
+        if (!File.Exists(fileName))
+            throw new ParseException(
+                $"File {fileName} not found",
+                new FileNotFoundException(null, fileName)
+            );
+        using var file = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var reader = new StreamReader(file);
+        return Parse(reader);
+    }
+
+    public T Parse(TextReader reader)
+    {
+        var state = new Parser.State
+        {
+            reader = reader,
+            buffer = stackalloc char[1024],
+        };
+        return Parse(ref state) ?? throw new ParseException(
+            "cannot read solution file"
+        );
+    }
+
     public abstract T? Parse(ref State state);
 
     /// <summary>

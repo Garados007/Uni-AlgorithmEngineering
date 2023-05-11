@@ -10,7 +10,7 @@ public sealed class SolutionFileParser : ParserBase<SolutionFile>
             var index = ReadInt32(ref state);
             if (index is null)
                 throw new ParseException(ref state, "index expected");
-            if (index.Value + 1 != file.Routes.Count)
+            if (index.Value != file.Routes.Count + 1)
                 throw new ParseException(ref state, $"index {file.Routes.Count + 1} expected");
             if (!CheckKeyword(ref state, ":"))
                 throw new ParseException(ref state, "colon expected");
