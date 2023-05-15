@@ -407,6 +407,8 @@ jobs:
         with:
           name: evaluation-metrics
           path: metrics/evaluation
+      - name: Create output directory
+        run: mkdir metrics/plots/
       - name: Generate Plots
         run: julia src/Plot/render.jl
       - name: Upload metrics
