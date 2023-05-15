@@ -1,4 +1,4 @@
-namespace Library.Checks;
+namespace Library.Validation;
 
 public sealed class SolutionFileValidator
 {
