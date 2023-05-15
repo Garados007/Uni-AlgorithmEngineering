@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Library;
 
 /// <summary>
 /// Specifies the type of the data.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DataType
 {
     /// <summary>

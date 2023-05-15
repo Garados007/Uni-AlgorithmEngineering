@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Library;
 
 public class Specification
@@ -16,6 +18,7 @@ public class Specification
     /// Additional comments (usually the name of the contributor or creator of
     /// the problem instance is given here).
     /// </summary>
+    [JsonIgnore]
     public ReadOnlyMemory<string> Comment { get; }
 
     /// <summary>
@@ -80,6 +83,21 @@ public class Specification
         if (display is null)
             DisplayDataType = NodeCoordType == NodeCoordType.NO_COORDS ? DisplayDataType.NO_DISPLAY : DisplayDataType.COORD_DISPLAY;
         else DisplayDataType = display.Value;
+    }
+
+    [JsonConstructor]
+    public Specification(string name, DataType type, int? dimension, int? capacity, EdgeWeightType? edgeWeightType, EdgeWeightFormat? edgeWeightFormat, EdgeDataFormat? edgeDataFormat, NodeCoordType nodeCoordType, DisplayDataType displayDataType)
+    {
+        Name = name;
+        Type = type;
+        Comment = ReadOnlyMemory<string>.Empty;
+        Dimension = dimension;
+        Capacity = capacity;
+        EdgeWeightType = edgeWeightType;
+        EdgeWeightFormat = edgeWeightFormat;
+        EdgeDataFormat = edgeDataFormat;
+        NodeCoordType = nodeCoordType;
+        DisplayDataType = displayDataType;
     }
 
     private static NodeCoordType EnforcedNodeCoordType(EdgeWeightType? type)

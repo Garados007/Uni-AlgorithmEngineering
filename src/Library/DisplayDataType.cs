@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Library;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Library;
 /// if node coordinates are specified and <see cref="DisplayDataType.NO_DISPLAY" />
 /// otherwise.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DisplayDataType
 {
     /// <summary>

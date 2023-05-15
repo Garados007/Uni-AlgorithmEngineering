@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Library;
 
 /// <summary>
 /// Describes the format of the edge weights if they are given explicitly.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum EdgeWeightFormat
 {
     /// <summary>
