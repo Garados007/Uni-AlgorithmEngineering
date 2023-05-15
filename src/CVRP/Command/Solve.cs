@@ -56,6 +56,9 @@ public sealed class Solve : ICommand
             greedy-simple           Uses a greedy algorithm which always searches for the closest
                                     unused neighbour until the current capacity is exhausted.
 
+            back-to-depot           Similar to greedy-simple but includes the distance to the
+                                    closest depot node to the cost function.
+
         Examples:
 
             CVRP solve -
@@ -93,6 +96,9 @@ public sealed class Solve : ICommand
                         {
                             case "greedy-simple":
                                 solver = new SimpleHeuristic();
+                                break;
+                            case "back-to-depot":
+                                solver = new BackToDepot();
                                 break;
                             default:
                                 Console.Error.WriteLine($"unsupported solver \"{args[1]}\"");

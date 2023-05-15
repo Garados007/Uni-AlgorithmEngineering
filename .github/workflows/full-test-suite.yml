@@ -265,6 +265,7 @@ jobs:
         file: ${{ fromJSON(needs.GetSolutionFiles.outputs.graph_for_sols) }}
         solver:
           - greedy-simple
+          - back-to-depot
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

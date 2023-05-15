@@ -171,6 +171,7 @@ public sealed class Benchmark : ICommand
         if (solverExplicit.Count == 0)
         {
             solverExplicit.Add("greedy-simple");
+            solverExplicit.Add("back-to-depot");
         }
         solverExplicit.ExceptWith(solverBlacklist);
         if (solverExplicit.Count == 0)
