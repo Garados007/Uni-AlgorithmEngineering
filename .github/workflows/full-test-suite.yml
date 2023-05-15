@@ -347,7 +347,7 @@ jobs:
             metrics
 
   EvaluateMetrics:
-    name: Execute Benchmark
+    name: Evaluate Metrics
     runs-on: ubuntu-latest
     needs:
       # data dependency
