@@ -61,12 +61,47 @@ public sealed class EvaluateMetrics : ICommand
         Console.WriteLine($"{metrics.Count} metrics found");
 
         Console.WriteLine("Calculate node count timings");
-        GetNodeCountTimings(metrics);
+        GetNodeCountTimings(metrics, null);
+        var edgeWeights = GetEdgeWeights(metrics);
+        foreach (var edgeWeight in edgeWeights.Keys)
+            GetNodeCountTimings(metrics, edgeWeight);
 
         return 0;
     }
 
-    private void GetNodeCountTimings(List<Metrics> metrics)
+    private Dictionary<EdgeWeightType, int> GetEdgeWeights(List<Metrics> metrics)
+    {
+        var res = new Dictionary<EdgeWeightType, int>();
+
+        foreach (var metric in metrics)
+        {
+            if (metric.DataFile?.EdgeWeightType is null)
+                continue;
+            if (res.TryGetValue(metric.DataFile.EdgeWeightType.Value, out int count))
+                res[metric.DataFile.EdgeWeightType.Value] = count + 1;
+            else res[metric.DataFile.EdgeWeightType.Value] = 1;
+        }
+
+        using var output = new FileStream(
+            Path.Combine(outputDir!, "edge-weight-types.csv"),
+            FileMode.OpenOrCreate,
+            FileAccess.Write,
+            FileShare.Read
+        );
+        using var writer = new StreamWriter(output);
+
+        writer.WriteLine("Type,Count");
+        foreach (var (type, count) in res)
+        {
+            writer.WriteLine($"\"{type}\",{count}");
+        }
+
+        writer.Flush();
+
+        return res;
+    }
+
+    private void GetNodeCountTimings(List<Metrics> metrics, EdgeWeightType? type)
     {
         var res = new Dictionary<string, List<(TimeSpan time, int count)>>();
         var header = new Dictionary<int, int>();
@@ -77,6 +112,8 @@ public sealed class EvaluateMetrics : ICommand
             {
                 continue;
             }
+            if (type != null && metric.DataFile.EdgeWeightType != type)
+                continue;
             if (!res.TryGetValue(metric.Solution.Solver!, out var list))
                 res.Add(metric.Solution.Solver, list = new());
 
@@ -92,7 +129,10 @@ public sealed class EvaluateMetrics : ICommand
         }
 
         using var output = new FileStream(
-            Path.Combine(outputDir!, "node-count-timing.csv"),
+            Path.Combine(
+                outputDir!,
+                type is null ? "node-count-timing.csv" : $"node-count-timing-{type}.csv"
+            ),
             FileMode.OpenOrCreate,
             FileAccess.Write,
             FileShare.Read
