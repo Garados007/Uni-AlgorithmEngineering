@@ -1,5 +1,5 @@
 using Library.Parser;
-using Library.Checks;
+using Library.Validation;
 using Library;
 
 namespace CVRP.Command;
