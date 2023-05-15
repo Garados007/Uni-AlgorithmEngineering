@@ -188,6 +188,7 @@ public sealed class Solve : ICommand
             return 3;
         }
         metrics.Timings.Solving = Stopwatch.GetElapsedTime(start) / cycles;
+        metrics.Timings.SolverCycles = cycles;
         metrics.Solution.Solver = solver.GetType().FullName;
         metrics.Solution.Cost = solutionFile.Cost;
 
@@ -198,6 +199,7 @@ public sealed class Solve : ICommand
             for (int i = 0; i < iteration; ++i)
                 solver.Solve(dataFile);
             metrics.Timings.Solving = Stopwatch.GetElapsedTime(start) / iteration;
+            metrics.Timings.SolverCycles = iteration;
         }
 
         start = Stopwatch.GetTimestamp();

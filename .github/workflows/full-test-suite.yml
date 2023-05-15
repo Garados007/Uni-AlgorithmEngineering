@@ -344,3 +344,74 @@ jobs:
           name: benchmark-metrics
           path: |
             metrics
+
+  EvaluateMetrics:
+    name: Execute Benchmark
+    runs-on: ubuntu-latest
+    needs:
+      # data dependency
+      - Build
+      - Benchmark
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Download Metrics
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: benchmark-metrics
+          path: metrics
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
+      - name: Evaluate
+        run: bin/CVRP evaluate-metrics metrics metrics/evaluation
+      - name: Upload Evaluation results
+        uses: actions/upload-artifact@v3
+        with:
+          name: evaluation-metrics
+          path: |
+            metrics/evaluation
+
+  GeneratePlots:
+    name: Generate Plots
+    runs-on: ubuntu-latest
+    container: julia:latest
+    needs:
+      # data dependency
+      EvaluateMetrics
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Use Julia Cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.julia"
+          key: ${{ runner.os }}-julia
+      - name: Download Metrics
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: evaluation-metrics
+          path: metrics/evaluation
+      - name: Generate Plots
+        run: julia src/Plot/render.jl
+      - name: Upload metrics
+        uses: actions/upload-artifact@v3
+        with:
+          name: evaluation-plots
+          path: |
+            metrics/plots/

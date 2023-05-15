@@ -15,6 +15,8 @@ public sealed class Metrics
         public TimeSpan Writing { get; set; }
 
         public double WritingSec => Writing.TotalSeconds;
+
+        public int SolverCycles { get; set; } = 1;
     }
 
     public sealed class MetricSolution
@@ -26,7 +28,7 @@ public sealed class Metrics
 
     public Specification? DataFile { get; set; }
 
-    public MetricTiming Timings { get; } = new();
+    public MetricTiming Timings { get; set; } = new();
 
-    public MetricSolution Solution { get; } = new();
+    public MetricSolution Solution { get; set; } = new();
 }
