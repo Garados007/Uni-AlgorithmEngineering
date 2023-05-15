@@ -393,6 +393,8 @@ jobs:
       # data dependency
       EvaluateMetrics
     steps:
+      - name: Install git
+        run: apt update && apt install -y git && apt clean
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
