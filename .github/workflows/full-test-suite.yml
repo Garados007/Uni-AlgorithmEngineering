@@ -337,7 +337,7 @@ jobs:
           bin/CVRP benchmark \
             -i "problems" \
             -m "metrics" \
-            -c 1
+            -t 30
       - name: Upload metrics
         uses: actions/upload-artifact@v3
         with:

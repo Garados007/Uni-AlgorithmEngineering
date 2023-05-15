@@ -16,13 +16,15 @@ public sealed class Solve : ICommand
     private string? inputFile;
     private string? metricFile;
 
-    private int cycles;
+    private readonly int cycles;
+    private readonly int? time;
 
-    public Solve(int cycles = 1)
+    public Solve(int cycles = 1, int? time = null)
     {
         if (cycles < 1)
             throw new ArgumentOutOfRangeException(nameof(cycles));
         this.cycles = cycles;
+        this.time = time;
     }
 
     private static void WriteHelp()
@@ -188,6 +190,15 @@ public sealed class Solve : ICommand
         metrics.Timings.Solving = Stopwatch.GetElapsedTime(start) / cycles;
         metrics.Solution.Solver = solver.GetType().FullName;
         metrics.Solution.Cost = solutionFile.Cost;
+
+        if (time is not null)
+        {
+            var iteration = (int)Math.Ceiling(time.Value / metrics.Timings.SolvingSec);
+            start = Stopwatch.GetTimestamp();
+            for (int i = 0; i < iteration; ++i)
+                solver.Solve(dataFile);
+            metrics.Timings.Solving = Stopwatch.GetElapsedTime(start) / iteration;
+        }
 
         start = Stopwatch.GetTimestamp();
         if (outputFile == "-")

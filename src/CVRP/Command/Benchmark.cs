@@ -10,6 +10,7 @@ public sealed class Benchmark : ICommand
     private readonly HashSet<string> solverExplicit = new();
     private readonly HashSet<string> solverBlacklist = new();
     private int cycles = 1;
+    private int? time;
 
     private static void WriteHelp()
     {
@@ -45,6 +46,13 @@ public sealed class Benchmark : ICommand
             --cycles <cycles>       The number of repetition the solving algorithm should be executed. This
                                     will only repeat the solving process. The output contains the average
                                     time of all solving steps. The default value is 1.
+
+            -t <time sec>
+            --time <time sec>       Similar to --cycles but will repeat a single run for the specified time
+                                    limit. The number is defined in seconds. Setting this option will ignore
+                                    any setting defined with --cycles. The benchmark will always execute a
+                                    test run for each solver first to determine the number of cycles for each
+                                    run.
 
         CVRP benchmark uses CVRP solve under the hood. Check the documentation there to see a list of
         available solver.
@@ -115,6 +123,14 @@ public sealed class Benchmark : ICommand
                         }
                         this.cycles = cycles;
                         break;
+                    case "-t" or "--time":
+                        if (!int.TryParse(args[1], out int timeSecs) || timeSecs <= 0)
+                        {
+                            Console.Error.WriteLine($"invalid time argument: {args[1]}");
+                            return false;
+                        }
+                        this.time = timeSecs;
+                        break;
                     default:
                         Console.Error.WriteLine($"Unknown option {args[0]}");
                         return false;
@@ -136,6 +152,10 @@ public sealed class Benchmark : ICommand
         {
             Console.Error.WriteLine("metrics directory expected");
             return false;
+        }
+        if (time is not null)
+        {
+            cycles = 1;
         }
         return true;
     }
