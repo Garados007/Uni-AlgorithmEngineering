@@ -16,6 +16,15 @@ public sealed class Solve : ICommand
     private string? inputFile;
     private string? metricFile;
 
+    private int cycles;
+
+    public Solve(int cycles = 1)
+    {
+        if (cycles < 1)
+            throw new ArgumentOutOfRangeException(nameof(cycles));
+        this.cycles = cycles;
+    }
+
     private static void WriteHelp()
     {
         Console.Error.WriteLine("""
@@ -158,10 +167,14 @@ public sealed class Solve : ICommand
         metrics.Timings.Parsing = Stopwatch.GetElapsedTime(start);
         metrics.DataFile = dataFile.Specification;
 
-        SolutionFile? solutionFile;
+        SolutionFile? solutionFile = null;
 
         start = Stopwatch.GetTimestamp();
-        try { solutionFile = solver.Solve(dataFile); }
+        try
+        {
+            for (int i = 0; i < cycles; ++i)
+                solutionFile = solver.Solve(dataFile);
+        }
         catch (Exception e) when (e is ValidationException || e is SolverException)
         {
             Console.Error.WriteLine($"{e.GetType()}: {e.Message}");
@@ -172,7 +185,7 @@ public sealed class Solve : ICommand
             Console.Error.WriteLine("Cannot generate a solution file");
             return 3;
         }
-        metrics.Timings.Solving = Stopwatch.GetElapsedTime(start);
+        metrics.Timings.Solving = Stopwatch.GetElapsedTime(start) / cycles;
         metrics.Solution.Solver = solver.GetType().FullName;
         metrics.Solution.Cost = solutionFile.Cost;
 

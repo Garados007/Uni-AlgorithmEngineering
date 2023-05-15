@@ -17,6 +17,8 @@ public static class Program
                 Validates a solution file.
             solve:
                 Solves a problem file.
+            benchmark:
+                Executes a benchmark for the various solver.
         """);
     }
 
@@ -41,6 +43,8 @@ public static class Program
                 return new Command.ValidateSol().Run(args[1..]);
             case "solve":
                 return new Command.Solve().Run(args[1..]);
+            case "benchmark":
+                return new Command.Benchmark().Run(args[1..]);
             default:
                 Console.Error.WriteLine($"Unknown command {args[0]}");
                 WriteHelp();

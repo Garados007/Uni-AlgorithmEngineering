@@ -300,3 +300,47 @@ jobs:
           name: solver-metrics
           path: |
             metrics
+
+  Benchmark:
+    name: Execute Benchmark
+    runs-on: ubuntu-latest
+    needs:
+      # data dependency
+      - Build
+      # logical dependency
+      - TestParsing_CVRPController
+      - TestParsing_TSPLIB95
+      - ExecuteSolver
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
+      - name: Move problem files
+        run: |
+          mkdir problems && \
+          find vendor/test -name "*.vrp" | xargs -I {} cp "{}" problems/
+      - name: Run test
+        run: |
+          bin/CVRP benchmark \
+            -i "problems" \
+            -m "metrics" \
+            -c 1
+      - name: Upload metrics
+        uses: actions/upload-artifact@v3
+        with:
+          name: solver-metrics
+          path: |
+            metrics
