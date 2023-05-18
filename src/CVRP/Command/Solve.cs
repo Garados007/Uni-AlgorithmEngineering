@@ -261,7 +261,8 @@ public sealed class Solve : ICommand
             solutionFile.WriteTo(writer);
             writer.Flush();
             if (file.CanSeek)
-                file.SetLength(file.Position);
+                try { file.SetLength(file.Position); }
+                catch (IOException) {}
         }
         metrics.Timings.Writing = Stopwatch.GetElapsedTime(start);
 
