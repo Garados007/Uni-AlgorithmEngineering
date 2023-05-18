@@ -67,6 +67,10 @@ public sealed class Solve : ICommand
             back-to-depot           Similar to greedy-simple but includes the distance to the
                                     closest depot node to the cost function.
 
+            space-partition         Similar to greedy-simple but uses a 2D space partition into
+                                    smaller areas and try to prefere nodes that are closer to the
+                                    current one.
+
         Examples:
 
             CVRP solve -
@@ -107,6 +111,9 @@ public sealed class Solve : ICommand
                                 break;
                             case "back-to-depot":
                                 solver = new BackToDepot();
+                                break;
+                            case "space-partition":
+                                solver = new SpacePartitionHeuristic();
                                 break;
                             default:
                                 Console.Error.WriteLine($"unsupported solver \"{args[1]}\"");
@@ -227,6 +234,7 @@ public sealed class Solve : ICommand
             metrics.Timings.SolverCycles = iteration;
             Console.WriteLine($"\t\tFull Run: {metrics.Timings.Solving * iteration}");
             Console.WriteLine($"\t\tAverage Run: {metrics.Timings.Solving}");
+            Console.WriteLine($"\t\tCost: {solutionFile.Cost}");
         }
 
         start = Stopwatch.GetTimestamp();
@@ -275,5 +283,6 @@ public sealed class Solve : ICommand
         });
         JsonSerializer.Serialize(writer, metrics);
         writer.Flush();
+        output.SetLength(output.Position);
     }
 }
