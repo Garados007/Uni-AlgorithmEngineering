@@ -266,6 +266,7 @@ jobs:
         solver:
           - greedy-simple
           - back-to-depot
+          - space-partition
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
