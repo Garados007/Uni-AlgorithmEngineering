@@ -267,6 +267,7 @@ jobs:
           - greedy-simple
           - back-to-depot
           - space-partition
+          - furthest-first-two-sided
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -340,7 +341,7 @@ jobs:
           bin/CVRP benchmark \
             -i "problems" \
             -m "metrics" \
-            -t 30 \
+            -t 5 \
             -f --skip-not-applicable
       - name: Upload metrics
         uses: actions/upload-artifact@v3

@@ -183,6 +183,7 @@ public sealed class Benchmark : ICommand
             solverExplicit.Add("greedy-simple");
             solverExplicit.Add("back-to-depot");
             solverExplicit.Add("space-partition");
+            solverExplicit.Add("furthest-first-two-sided");
         }
         solverExplicit.ExceptWith(solverBlacklist);
         if (solverExplicit.Count == 0)

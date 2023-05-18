@@ -69,7 +69,13 @@ public sealed class Solve : ICommand
 
             space-partition         Similar to greedy-simple but uses a 2D space partition into
                                     smaller areas and try to prefere nodes that are closer to the
-                                    current one.
+                                    current one. This does only allow one depot node.
+
+            furthest-first-two-sided
+                                    Similar to greedy-simple but tries to use furthest nodes from
+                                    the depot first and add afterwards closest nodes to both ends
+                                    of the path until the capacity is exhausted. This does only
+                                    allow one depot node.
 
         Examples:
 
@@ -114,6 +120,9 @@ public sealed class Solve : ICommand
                                 break;
                             case "space-partition":
                                 solver = new SpacePartitionHeuristic();
+                                break;
+                            case "furthest-first-two-sided":
+                                solver = new FurthestFirstTwoSidedHeuristic();
                                 break;
                             default:
                                 Console.Error.WriteLine($"unsupported solver \"{args[1]}\"");
@@ -251,6 +260,7 @@ public sealed class Solve : ICommand
             using var writer = new StreamWriter(file);
             solutionFile.WriteTo(writer);
             writer.Flush();
+            file.SetLength(file.Position);
         }
         metrics.Timings.Writing = Stopwatch.GetElapsedTime(start);
 
