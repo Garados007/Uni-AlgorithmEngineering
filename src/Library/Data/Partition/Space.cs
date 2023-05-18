@@ -44,7 +44,7 @@ public sealed class Space2D
         }
 
         MinCoords = min;
-        MaxCoords = max;
+        MaxCoords = max + Vector2.One;
         if (Nodes.Count >= tilingCapacity)
         {
             Tiling = new Space2DTiling(this, (MinCoords + MaxCoords) / 2, tilingCapacity);
@@ -64,7 +64,7 @@ public sealed class Space2D
         foreach (var node in parent.Nodes)
         {
             var pos = Coords[node];
-            if (Vector2.Clamp(pos, MinCoords, MaxCoords) == pos)
+            if (MinCoords.X <= pos.X && MinCoords.Y <= pos.Y && pos.X < MaxCoords.X && pos.Y < MaxCoords.Y)
             {
                 Nodes.Add(node);
                 accessTable.Span[node] = this;
