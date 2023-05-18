@@ -287,6 +287,7 @@ jobs:
         run: |
           bin/CVRP solve \
             -s "${{ matrix.solver }}" \
+            --skip-not-applicable \
             -m "metrics/$(basename ${{ matrix.file }} .vrp).json" \
             "${{ matrix.file }}" \
             | tee "${{ matrix.file }}.sol"
@@ -338,7 +339,8 @@ jobs:
           bin/CVRP benchmark \
             -i "problems" \
             -m "metrics" \
-            -t 30
+            -t 30 \
+            -f --skip-not-applicable
       - name: Upload metrics
         uses: actions/upload-artifact@v3
         with:

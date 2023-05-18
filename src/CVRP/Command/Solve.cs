@@ -15,6 +15,7 @@ public sealed class Solve : ICommand
     private string outputFile = "-";
     private string? inputFile;
     private string? metricFile;
+    private bool skipNotApplicable = false;
 
     private readonly int cycles;
     private readonly int? time;
@@ -47,6 +48,13 @@ public sealed class Solve : ICommand
             --metrics <metric file> Output some metrics about the solving process in a JSON format.
                                     Can be "-" to print to std output. It wont output anything by
                                     default.
+
+            --skip-not-applicable   Skips processing problem files which haven't the correct data
+                                    to be processed. This is only used for some solving algorithms
+                                    and doesn't change the basic CVRP verification. If this flag is
+                                    enabled and problem is considered as not applicable then this
+                                    application won't fail if so. It will also return a Github
+                                    Actions style warning for these cases.
 
             <problem file>          The problem file to read the specification. Must be a CVRP
                                     problem. You can also use "-" to read from stdin.
@@ -135,6 +143,10 @@ public sealed class Solve : ICommand
                         metricFile = args[1];
                         args = args[2..];
                         break;
+                    case "--skip-not-applicable":
+                        skipNotApplicable = true;
+                        args = args[1..];
+                        break;
                     default:
                         Console.Error.WriteLine($"Unsupported parameter {args[0]}");
                         break;
@@ -183,6 +195,11 @@ public sealed class Solve : ICommand
             for (int i = 0; i < cycles; ++i)
                 solutionFile = solver.Solve(dataFile);
         }
+        catch (SolverNotApplicableException e) when (skipNotApplicable)
+        {
+            Console.Out.WriteLine($"::warning::{e.GetType()}: {e.Message}");
+            return 0;
+        }
         catch (Exception e) when (e is ValidationException || e is SolverException)
         {
             Console.Error.WriteLine($"{e.GetType()}: {e.Message}");
@@ -201,11 +218,15 @@ public sealed class Solve : ICommand
         if (time is not null)
         {
             var iteration = (int)Math.Ceiling(time.Value / metrics.Timings.SolvingSec);
+            Console.WriteLine($"\t\tSingle Run: {metrics.Timings.Solving}");
+            Console.WriteLine($"\t\tIteration: {iteration}");
             start = Stopwatch.GetTimestamp();
             for (int i = 0; i < iteration; ++i)
                 solver.Solve(dataFile);
             metrics.Timings.Solving = Stopwatch.GetElapsedTime(start) / iteration;
             metrics.Timings.SolverCycles = iteration;
+            Console.WriteLine($"\t\tFull Run: {metrics.Timings.Solving * iteration}");
+            Console.WriteLine($"\t\tAverage Run: {metrics.Timings.Solving}");
         }
 
         start = Stopwatch.GetTimestamp();

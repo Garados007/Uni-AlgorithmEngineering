@@ -11,6 +11,7 @@ public sealed class Benchmark : ICommand
     private readonly HashSet<string> solverBlacklist = new();
     private int cycles = 1;
     private int? time;
+    private readonly List<string> flags = new();
 
     private static void WriteHelp()
     {
@@ -53,6 +54,12 @@ public sealed class Benchmark : ICommand
                                     any setting defined with --cycles. The benchmark will always execute a
                                     test run for each solver first to determine the number of cycles for each
                                     run.
+
+            -f <solver flag>
+            --flag <solver flag>    Sets additional flags or option for the internal solver. Check the
+                                    documentation of CVRP solve for more details. This flag won't set any
+                                    arguments. If any flag needs an argument just use "-f <name> -f <value>".
+                                    It isn't recommended to overwrite any options that this benchmark tool sets.
 
         CVRP benchmark uses CVRP solve under the hood. Check the documentation there to see a list of
         available solver.
@@ -131,6 +138,9 @@ public sealed class Benchmark : ICommand
                         }
                         this.time = timeSecs;
                         break;
+                    case "-f" or "--flags":
+                        flags.Add(args[1]);
+                        break;
                     default:
                         Console.Error.WriteLine($"Unknown option {args[0]}");
                         return false;
@@ -206,13 +216,18 @@ public sealed class Benchmark : ICommand
 
                 var metricFile = Path.Combine(metricDir, $"{Path.GetFileNameWithoutExtension(baseName)}-{solver}.json");
 
-                var result = new Solve(cycles).Run(new[]
+                ReadOnlySpan<string> solveBasicArgs = new[]
                 {
                     "-s", solver,
                     "-o", outputFile,
                     "-m", metricFile,
-                    file
-                });
+                    file,
+                };
+                var solveFullArgs = new string[solveBasicArgs.Length + flags.Count];
+                solveBasicArgs.CopyTo(solveFullArgs);
+                flags.CopyTo(solveFullArgs, solveBasicArgs.Length);
+
+                var result = new Solve(cycles, time).Run(solveFullArgs);
 
                 if (result != 0)
                 {
