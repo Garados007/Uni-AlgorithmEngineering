@@ -260,7 +260,8 @@ public sealed class Solve : ICommand
             using var writer = new StreamWriter(file);
             solutionFile.WriteTo(writer);
             writer.Flush();
-            file.SetLength(file.Position);
+            if (file.CanSeek)
+                file.SetLength(file.Position);
         }
         metrics.Timings.Writing = Stopwatch.GetElapsedTime(start);
 
