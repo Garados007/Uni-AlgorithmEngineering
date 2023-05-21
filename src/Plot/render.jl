@@ -66,6 +66,39 @@ function render(csv_df, filePrefix, edgeWeight)
 
 end
 
+
+function renderPerf(csv_df)
+    csv_names = deleteat!(deleteat!(names(csv_df), 1), 1);
+
+    plot(
+        csv_df.Nodes,
+        [ csv_df[:, name] for name in csv_names ],
+        seriestype=:scatter,
+        label=reshape(["$(n)" for n in csv_names], (1, :)),
+        xlabel = "Nodes",
+        xaxis=:log,
+        ylabel = "relative Cost",
+        title = "Performance",
+        legend=:topleft,
+        minorgrid=true
+    )
+    savefig("metrics/plots/performance-plot-log.png")
+
+    plot(
+        csv_df.Nodes,
+        [ csv_df[:, name] for name in csv_names ],
+        seriestype=:scatter,
+        label=reshape(["$(n)" for n in csv_names], (1, :)),
+        xlabel = "Nodes",
+        ylabel = "relative Cost",
+        title = "Performance",
+        legend=:topleft,
+        minorgrid=true
+    )
+    savefig("metrics/plots/performance-plot-linear.png")
+
+end
+
 csv_df = CSV.read("metrics/evaluation/node-count-timing.csv", DataFrames.DataFrame)
 render(csv_df, "full", "")
 
@@ -75,3 +108,6 @@ for name in edge_names.Type
     local csv_df = CSV.read("metrics/evaluation/node-count-timing-$(name).csv", DataFrames.DataFrame)
     render(csv_df, name, name)
 end
+
+csv_df = CSV.read("metrics/evaluation/node-performance.csv", DataFrames.DataFrame)
+renderPerf(csv_df)

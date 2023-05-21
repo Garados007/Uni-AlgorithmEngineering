@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using Library;
+using Library.Solver;
 
 namespace CVRP.Command;
 
@@ -65,6 +66,9 @@ public sealed class EvaluateMetrics : ICommand
         var edgeWeights = GetEdgeWeights(metrics);
         foreach (var edgeWeight in edgeWeights.Keys)
             GetNodeCountTimings(metrics, edgeWeight);
+
+        Console.WriteLine("Calculate solver performance");
+        GetPerformance(metrics);
 
         return 0;
     }
@@ -160,5 +164,85 @@ public sealed class EvaluateMetrics : ICommand
         }
 
         writer.Flush();
+    }
+
+    private void GetPerformance(List<Metrics> metrics)
+    {
+        var res = new Dictionary<string, List<double>>();
+        var header = new Dictionary<string, (int row, int nodes)>();
+
+        foreach (var metric in metrics)
+        {
+            if (metric.Solution.Solver is null || metric.DataFile?.Name is null || metric.DataFile?.Dimension is null)
+            {
+                continue;
+            }
+
+            if (!header.TryGetValue(metric.DataFile.Name, out var headerResult))
+                header.Add(metric.DataFile.Name, headerResult = (header.Count, metric.DataFile.Dimension.Value));
+            var row = headerResult.row;
+
+            if (!res.TryGetValue(metric.Solution.Solver, out var list))
+                res.Add(metric.Solution.Solver, list = new());
+
+            if (list.Count <= row)
+                list.AddRange(Enumerable.Repeat(double.NaN, row - list.Count + 1));
+
+            list[row] = metric.Solution.Cost;
+        }
+
+        var allowed = new HashSet<string>
+        {
+            typeof(Library.Solver.CVRP.SimpleHeuristic).FullName!,
+            typeof(Library.Solver.CVRP.SpacePartitionHeuristic).FullName!,
+        };
+        foreach (var name in res.Keys.ToArray())
+        {
+            if (!allowed.Contains(name))
+                res.Remove(name);
+        }
+
+        if (res.Count == 0)
+            return;
+
+        var mainName = typeof(Library.Solver.CVRP.SimpleHeuristic).FullName;
+        if (mainName is null || !res.ContainsKey(mainName))
+            mainName = res.Keys.First();
+
+        for (int i = 0; i < header.Count; ++i)
+        {
+            var baseValue = res[mainName][i];
+            foreach (var list in res.Values)
+                list[i] /= baseValue;
+        }
+
+        using var output = new FileStream(
+            Path.Combine(
+                outputDir!,
+                "node-performance.csv"
+            ),
+            FileMode.OpenOrCreate,
+            FileAccess.Write,
+            FileShare.Read
+        );
+        using var writer = new StreamWriter(output);
+
+        writer.Write("Name,Nodes");
+        foreach (var solver in res.Keys)
+            writer.Write($",\"{solver}\"");
+        writer.WriteLine();
+        foreach (var (name, (row, nodes)) in header)
+        {
+            writer.Write($"\"{name}\",{nodes}");
+            foreach (var list in res.Values)
+            {
+                writer.Write(",");
+                if (!double.IsNaN(list[row]))
+                    writer.Write(list[row].ToString(CultureInfo.InvariantCulture));
+            }
+            writer.WriteLine();
+        }
+        writer.Flush();
+        output.SetLength(output.Position);
     }
 }
