@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Library;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Library;
 /// example may be used for either graphical display or distance computations). <br/>
 /// THe default value is <see cref="NodeCoordType.NO_COORDS" />.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum NodeCoordType
 {
     /// <summary>

@@ -1,4 +1,4 @@
-namespace Library.Checks;
+namespace Library.Validation;
 
 [System.Serializable]
 public class ValidationException : System.Exception

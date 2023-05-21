@@ -14,6 +14,7 @@ public sealed class DemandParser : ParserBase<Demand>
         var data = new Demand(Length);
         while (!state.EOF)
         {
+            SkipWhitespace(ref state);
             var index = ReadInt32(ref state);
             if (index is null)
                 return data;

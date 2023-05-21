@@ -127,6 +127,7 @@ jobs:
     outputs:
       files: ${{ steps.get_files.outputs.files }}
       arnold_files: ${{ steps.get_arnold_files.outputs.files }}
+      graph_for_sols: ${{ steps.graph_for_sols.outputs.files }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -146,6 +147,16 @@ jobs:
         run: |
           echo -n "files=" >> $GITHUB_OUTPUT && \
           find data/CVRPLIB/Arnold -name "*.sol" | \
+            while read file; do echo "\"$file\""; done | \
+            jq -sc "." \
+            >> $GITHUB_OUTPUT
+      - name: Get Problem files from existing solution
+        id: graph_for_sols
+        run: |
+          echo -n "files=" >> $GITHUB_OUTPUT && \
+          find data/CVRPLIB -name "*.sol" | \
+            xargs -I {} basename {} .sol | \
+            xargs -I {} find vendor/test/CVRPController -name "{}.vrp" | \
             while read file; do echo "\"$file\""; done | \
             jq -sc "." \
             >> $GITHUB_OUTPUT
@@ -237,3 +248,179 @@ jobs:
           name: test-reports
           path: |
             src/Test/TestResults
+
+  ExecuteSolver:
+    name: Execute Solver ${{ matrix.solver }} with ${{ matrix.file }}
+    runs-on: ubuntu-latest
+    needs:
+      # data dependency
+      - Build
+      - GetSolutionFiles
+      # logical dependency
+      - TestParsing_CVRPController
+      - TestParsing_TSPLIB95
+      - TestSolValidation
+    strategy:
+      matrix:
+        file: ${{ fromJSON(needs.GetSolutionFiles.outputs.graph_for_sols) }}
+        solver:
+          - greedy-simple
+          - back-to-depot
+          - space-partition
+          - furthest-first-two-sided
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
+      - name: Run test
+        run: |
+          bin/CVRP solve \
+            -s "${{ matrix.solver }}" \
+            --skip-not-applicable \
+            -m "metrics/$(basename ${{ matrix.file }} .vrp).json" \
+            "${{ matrix.file }}" \
+            | tee "${{ matrix.file }}.sol"
+      - name: Validate test
+        run: |
+          bin/CVRP validate-sol \
+            "${{ matrix.file }}" \
+            "${{ matrix.file }}.sol"
+      - name: Upload metrics
+        uses: actions/upload-artifact@v3
+        with:
+          name: solver-metrics
+          path: |
+            metrics
+
+  Benchmark:
+    name: Execute Benchmark
+    runs-on: ubuntu-latest
+    needs:
+      # data dependency
+      - Build
+      # logical dependency
+      - TestParsing_CVRPController
+      - TestParsing_TSPLIB95
+      - ExecuteSolver
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
+      - name: Move problem files
+        run: |
+          mkdir problems && \
+          find vendor/test -name "*.vrp" | xargs -I {} cp "{}" problems/
+      - name: Run test
+        run: |
+          bin/CVRP benchmark \
+            -i "problems" \
+            -m "metrics" \
+            -t 5 \
+            -f --skip-not-applicable
+      - name: Upload metrics
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-metrics
+          path: |
+            metrics
+
+  EvaluateMetrics:
+    name: Evaluate Metrics
+    runs-on: ubuntu-latest
+    needs:
+      # data dependency
+      - Build
+      - Benchmark
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Download Binary
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: build-binary
+          path: bin
+      - name: Download Metrics
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: benchmark-metrics
+          path: metrics
+      - name: Make binary executable
+        run: chmod +x bin/CVRP
+      - name: Evaluate
+        run: bin/CVRP evaluate-metrics metrics metrics/evaluation
+      - name: Upload Evaluation results
+        uses: actions/upload-artifact@v3
+        with:
+          name: evaluation-metrics
+          path: |
+            metrics/evaluation
+
+  GeneratePlots:
+    name: Generate Plots
+    runs-on: ubuntu-latest
+    container: julia:latest
+    needs:
+      # data dependency
+      EvaluateMetrics
+    steps:
+      - name: Install git
+        run: apt update && apt install -y git && apt clean
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Use Julia Cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.julia"
+          key: ${{ runner.os }}-julia
+      - name: Download Metrics
+        uses: actions/download-artifact@v3
+        continue-on-error: false
+        with:
+          name: evaluation-metrics
+          path: metrics/evaluation
+      - name: Create output directory
+        run: mkdir metrics/plots/
+      - name: Generate Plots
+        run: julia src/Plot/render.jl
+      - name: Upload metrics
+        uses: actions/upload-artifact@v3
+        with:
+          name: evaluation-plots
+          path: |
+            metrics/plots/

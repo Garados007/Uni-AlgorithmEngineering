@@ -3,3 +3,5 @@
 /src/**/obj
 # all test files
 /src/Test/TestResults
+/metrics
+/problems

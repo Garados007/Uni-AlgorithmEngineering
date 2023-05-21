@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Library;
 
 /// <summary>
 /// Specifies how the edge weights (or distances) are given.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum EdgeWeightType
 {
     /// <summary>
