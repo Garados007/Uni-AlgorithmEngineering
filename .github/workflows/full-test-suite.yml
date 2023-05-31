@@ -2,6 +2,8 @@ name: Full Test Suite
 run-name: All Tests
 on:
   push:
+    branches-ignore:
+      - test/*
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   DOTNET_NOLOGO: true

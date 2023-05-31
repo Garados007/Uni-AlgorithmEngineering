@@ -1,0 +1,18 @@
+name: Test Github Step Summary
+run-name: |
+    Test Github Step Summary :rocket:
+on:
+    push:
+        branches:
+            - test/*
+
+jobs:
+
+    BuildJob:
+        name: Some Build Job
+        runs-on: ubuntu-latest
+        steps:
+            - name: Create a summary
+              run: |
+                echo "# Hello World" >> $GITHUB_STEP_SUMMARY && \
+                echo "Lorem Ipsum dolor amet" >> $GITHUB_STEP_SUMMARY
